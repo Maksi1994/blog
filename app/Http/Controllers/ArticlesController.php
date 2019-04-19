@@ -66,4 +66,5 @@ class ArticlesController extends Controller
 
         return response()->json(compact('success'));
     }
+
 }

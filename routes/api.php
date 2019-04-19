@@ -25,3 +25,11 @@ Route::group([
     Route::post('/get-list', 'ArticlesController@getList');
     Route::get('/remove', 'ArticlesController@remove');
 });
+
+Route::group([
+    'prefix' => 'comments',
+], function () {
+    Route::post('/save', 'CommentsController@save');
+    Route::post('/get-list', 'CommentsController@getList');
+    Route::get('/delete', 'CommentsController@delete');
+});
