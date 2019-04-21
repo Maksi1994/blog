@@ -23,7 +23,7 @@ class File extends Model
 
         foreach ($images as $index => $image) {
             $name = Storage::disk('space')->putFile('files', $image, 'public');
-            $type = explode('/', $image->getClientMimeType())[0];
+            $type = $image->getClientMimeType();
             $fileModels[] = compact('name', 'type');
         }
 

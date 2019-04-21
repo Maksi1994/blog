@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\File;
+namespace App\Http\Resources\User;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FileResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,10 +14,6 @@ class FileResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-          'id' => $this->id,
-          'type' => $this->type,
-          'url' => str_replace('\\', '/', $this->url)
-        ];
+        return parent::toArray($request);
     }
 }

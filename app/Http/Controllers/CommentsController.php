@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 
 use App\Http\Resources\Comment\CommentCollection;
 use App\Models\Article;
@@ -19,14 +17,14 @@ class CommentsController extends Controller
         $validation = Validator::make($request->all(), [
             'id' => 'required',
             'body' => 'required|min:3',
-            'type' => 'in:article,comment',
+            'type' => 'required|in:article,comment',
             'comment_id' => 'exists:comments,id'
         ]);
         $success = false;
 
         if (!$validation->fails()) {
-            Comment::saveComment($request);
-            $success = true;
+             Comment::save($request);
+             $success = true;
         }
 
         return $this->success($success);
@@ -41,28 +39,17 @@ class CommentsController extends Controller
                 $comments = Article::find($request->id)->comments();
                 break;
             case 'reply':
-                $comments = Comment::find($request->id)->comments();
+                $comments = Comment::find($request->id)->children();
         }
 
         if ($comments) {
             $comments = $comments->with('files')->paginate(20, '*', '*', $request->page ?? 1);
         }
 
-        return (new CommentCollection($comments))->response();
+        return new CommentCollection($comments);
     }
 
-    public function downloadFile(Request $request)
-    {
-        $fileName = File::find($request->id)->url;
-        $headers = [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'. $fileName .'"',
-        ];
-
-        return response()->make(Storage::disk('s3')->get($fileName), 200, $headers);
-    }
-
-    public function delete(Request $request)
+    public function remove(Request $request)
     {
         $success = (boolean)Comment::destroy($request->id);
 

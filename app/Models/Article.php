@@ -28,6 +28,34 @@ class Article extends Model
         return $this->morphMany(Tag::class, 'tagable');
     }
 
+    public function files()
+    {
+       return $this->morphMany(File::class, 'attachable');
+    }
+
+    public static function save(Request $request)
+    {
+      $articleModel = self::updateOrCreate(
+          [
+            'id' => $request->id
+          ],
+          [
+              'title' => $request->title,
+              'body' => $request->body,
+              'user_id' => 1
+          ]
+      );
+
+      if (!empty($request->tags)) {
+          $articleModel->tags()->delete();
+          $articleModel->tags()->createMany($request->tags);
+      }
+
+      if (!empty($request->allFiles())) {
+         File::attachFiles($articleModel, array_values($request->allFiles()));
+      }
+    }
+
     public function scopeGetList($query, Request $request)
     {
         $order = $request->order ?? 'desc';

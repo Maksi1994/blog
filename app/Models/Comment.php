@@ -29,7 +29,12 @@ class Comment extends Model
         return $this->morphMany(File::class, 'attachable');
     }
 
-    public static function saveComment(Request $request)
+    public function children()
+    {
+      return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    public static function save(Request $request)
     {
         $model = null;
         $commentModel = null;
@@ -38,21 +43,24 @@ class Comment extends Model
         switch ($request->type) {
             case 'article':
                 $model = Article::find($request->id);
+                break;
+            case 'reply':
+                $model = Comment::find($request->id);
         }
 
         if ($model) {
             $commentModel = $model->comments()->updateOrCreate(
-                ['id' => $request->comment_id],
-                ['body' => $request->body]);
+                [
+                  'id' => $request->comment_id
+                ],
+                [
+                  'body' => $request->body,
+                  'parent_id' => $request->parent_id
+                ]
+              );
 
-            foreach ($request->all() as $requestItem) {
-                if ($requestItem instanceof UploadedFile) {
-                    $files[] = $requestItem;
-                }
-            }
-
-            if (!empty($files)) {
-                File::attachFiles($commentModel, $files);
+            if (!empty($request->allFiles())) {
+               File::attachFiles($commentModel, array_values($request->allFiles()));
             }
         }
     }
