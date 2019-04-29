@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddFileTypeColumn extends Migration
+class AddViewsAttribute extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddFileTypeColumn extends Migration
      */
     public function up()
     {
-        Schema::table('files', function (Blueprint $table) {
-            $table->string('type');
+        Schema::table('articles', function (Blueprint $table) {
+            $table->bigInteger('views')->default(0);
         });
     }
 
@@ -25,8 +25,8 @@ class AddFileTypeColumn extends Migration
      */
     public function down()
     {
-        Schema::table('files', function (Blueprint $table) {
-            $table->dropColumn('type');
+        Schema::table('articles', function (Blueprint $table) {
+            $table->dropColumn('views');
         });
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddFilesTable extends Migration
+class CreateResetPassword extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class AddFilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('files', function (Blueprint $table) {
+        Schema::create('reset_passwords', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
-            $table->string('attachable')->nullable();
-            $table->bigInteger('attachable_id')->unsigned()->nullable();
+            $table->string('email');
+            $table->string('token');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class AddFilesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('files');
+        Schema::dropIfExists('reset_passwords');
     }
 }

@@ -20,34 +20,42 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group([
     'prefix' => 'articles',
 ], function () {
-    Route::post('/save', 'ArticlesController@save');
+    Route::post('/save', 'ArticlesController@save')->middleware('auth:api');
     Route::post('/get-list', 'ArticlesController@getList');
-    Route::get('/remove/{id}', 'ArticlesController@remove');
+    Route::get('/remove/{id}', 'ArticlesController@remove')->middleware('auth:api');
 });
 
 Route::group([
     'prefix' => 'comments',
 ], function () {
-    Route::post('/save', 'CommentsController@save');
+    Route::post('/save', 'CommentsController@save')->middleware('auth:api');
     Route::post('/get-list', 'CommentsController@getList');
-    Route::get('/remove/{id}', 'CommentsController@remove');
+    Route::get('/remove/{id}', 'CommentsController@remove')->middleware('auth:api');
 });
 
 Route::group([
     'prefix' => 'users',
 ], function () {
-    Route::post('/create', 'UsersController@create');
+    Route::post('/regist', 'UsersController@regist');
     Route::post('/login', 'UsersController@login');
     Route::get('/accept-registration/{token}', 'UsersController@acceptRegistration');
 
     Route::group([
-      'middleware' => ['auth:api']
-    ], function() {
-      Route::get('/get-curr-user', 'UsersController@getCurrUser');
-      Route::post('/update', 'UsersController@update');
-      Route::post('/delete', 'UsersController@delete');
-      Route::get('/logout', 'UsersController@logout');
+        'middleware' => ['auth:api'],
+    ], function () {
+        Route::get('/get-curr-user', 'UsersController@getCurrUser');
+        Route::post('/is-another-password', 'UsersController@isAnotherPassword');
+        Route::post('/update', 'UsersController@update');
+        Route::post('/delete', 'UsersController@delete');
+        Route::get('/logout', 'UsersController@logout');
     });
+});
+
+Route::group([
+    'prefix' => 'main',
+], function () {
+    Route::post('/get-blogers-rating-list', 'MainController@getBlogersRatingList');
+    Route::post('/get-most-popular-articles', 'MainController@getMostPopularArticles');
 });
 
 Route::get('/files/download-file/{file_id}', 'FilesController@downloadFile');

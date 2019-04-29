@@ -7,7 +7,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class UserRegistration extends Notification
+class ResetPassword extends Notification
 {
     use Queueable;
 
@@ -40,13 +40,10 @@ class UserRegistration extends Notification
      */
     public function toMail($notifiable)
     {
-        $url = url('/api/users/accept-registration/'.$notifiable->token);
-
         return (new MailMessage)
-            ->subject('Confirm your account')
-            ->line('Thanks for signup! Please before you begin, you must confirm your account.')
-            ->action('Confirm Account', url($url))
-            ->line('Thank you for using our application!');
+                    ->line('The introduction to the notification.')
+                    ->action('Notification Action', url('/'))
+                    ->line('Thank you for using our application!');
     }
 
     /**

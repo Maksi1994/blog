@@ -20,7 +20,7 @@ class ArticlesController extends Controller
 
         if (!$validator->fails()) {
             $success = true;
-            Article::save($requst);
+            Article::saveArticle($request);
         }
 
         return $this->success($success);
@@ -32,7 +32,7 @@ class ArticlesController extends Controller
             ->getList($request)
             ->paginate(15, '*', '*', $request->id);
 
-        return $this->success($success);
+        return response()->json($articles);
     }
 
     public function delete(Request $request)

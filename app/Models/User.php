@@ -1,13 +1,15 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use App\Notifications\UserRegistration;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
-use App\Models\Article;
 
 class User extends Authenticatable
 {
@@ -38,33 +40,56 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function articles() {
-      return $this->hasMany(Article::class);
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
     }
 
-    public static function registUser(Request $request) {
-      if ($request->hasFile('avatar')) {
-          $avatar = Storage::disk('space')->putFile('avatars', $request->avatar, 'public');
-      }
+    public static function registUser(Request $request)
+    {
+        $avatar = null;
 
-      $user = self::create([
-        'id' => $request->id
-      ],[
-        'name' => $request->first_name. ' '. $request->last_name,
-        'token' => Str::random(),
-        'password' => bcrypt($request->password),
-        'avatar' => $avatar
-      ]);
+        if ($request->hasFile('avatar')) {
+            $avatar = Storage::disk('space')->putFile('avatars', $request->avatar, 'public');
+        }
 
-      $user->notify(new UserRegistration($user));
+        $user = new User();
+        $user->name = $request->first_name . ' ' . $request->last_name;
+        $user->token = Str::random();
+        $user->password = bcrypt($request->password);
+        $user->avatar = $avatar;
+        $user->email = $request->email;
+        $user->save();
+
+        $user->notify(new UserRegistration($user));
     }
 
-    public static function boot() {
+    public static function updateUser(Request $request)
+    {
+        $avatar = null;
+        $user = $request->user();
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('space')->delete($user->avatar);
+            }
+
+            $avatar = Storage::disk('space')->putFile('avatars', $request->avatar, 'public');
+        }
+
+        self::where('id', $request->user()->id)->update([
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'avatar' => $avatar
+        ]);
+    }
+
+    public static function boot()
+    {
         parent::boot();
-        self::deleting(function($user) {
-          if ($user->avatar) {
-            Storage::disk('space')->delete($user->avatar);
-          }
+        self::deleting(function ($user) {
+            if ($user->avatar) {
+                Storage::disk('space')->delete($user->avatar);
+            }
         });
     }
 }
