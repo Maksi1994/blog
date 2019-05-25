@@ -22,6 +22,7 @@ Route::group([
 ], function () {
     Route::post('/save', 'ArticlesController@save')->middleware('auth:api');
     Route::post('/get-list', 'ArticlesController@getList');
+    Route::get('/get-one/{id}', 'ArticlesController@getOne');
     Route::get('/remove/{id}', 'ArticlesController@remove')->middleware('auth:api');
 });
 
@@ -31,6 +32,14 @@ Route::group([
     Route::post('/save', 'CommentsController@save')->middleware('auth:api');
     Route::post('/get-list', 'CommentsController@getList');
     Route::get('/remove/{id}', 'CommentsController@remove')->middleware('auth:api');
+});
+
+Route::group([
+    'prefix' => 'favorites',
+    'middleware'=> 'auth:api'
+], function () {
+    Route::get('/get-user-favorites', 'FavoritesController@getUserFavorites');
+    Route::post('/toggle-favorite', 'FavoritesController@toggleFavorite');
 });
 
 Route::group([
@@ -59,3 +68,18 @@ Route::group([
 });
 
 Route::get('/files/download-file/{file_id}', 'FilesController@downloadFile');
+
+Route::group([
+    'prefix' => 'backend',
+    'middleware' => ['auth:api', 'is_admin'],
+    'namespace' => 'Backend'
+], function () {
+    Route::group([
+        'prefix' => 'users',
+    ], function () {
+        Route::post('/get-list', 'UsersController@getList');
+        Route::get('/get-user/{id}', 'UsersController@getUser');
+    });
+});
+
+

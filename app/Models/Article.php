@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Article extends Model
 {
@@ -15,7 +16,7 @@ class Article extends Model
 
     public function author()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function comments()
@@ -28,9 +29,20 @@ class Article extends Model
         return $this->morphMany(Tag::class, 'tagable');
     }
 
-    public function files()
+    public function articleFiles()
     {
         return $this->morphMany(File::class, 'attachable');
+    }
+
+    public function commentsFiles()
+    {
+        return $this->hasManyThrough(File::class, Comment::class, null, 'attachable_id')
+            ->where('attachable_type', Article::class);
+    }
+
+    public static function getOne(Request $request)
+    {
+        return self::with(['comments', 'author', 'tags', 'articleFiles'])->withCount(['comments'])->where('id', $request->id)->get();
     }
 
     public static function saveArticle(Request $request)
@@ -60,6 +72,8 @@ class Article extends Model
     {
         $order = $request->order ?? 'desc';
         $type = $request->type;
+        $beginDate = $request->beginDate;
+        $endDate = $request->endDate;
 
         if ($type === 'newest') {
             $query = $query->orderBy('created_at', $order);
@@ -69,12 +83,17 @@ class Article extends Model
             $query = $query->orderBy('comments_count', $order);
         }
 
+
+        if ($beginDate && $endDate) {
+            $query = $query->whereRaw('UNIX_TIMESTAMP(created_at) BETWEEN  ? AND ?', [$beginDate / 1000, $endDate / 1000]);
+        }
+
         return $query;
     }
 
-    public static function getBlogersRatingList(Request $request)
+    public static function scopeGetBlogersRatingList($query)
     {
-        return self::selectRaw('
+        return $query->selectRaw('
         ANY_VALUE(users.id) as id,
         ANY_VALUE(users.name) as name,
         ANY_VALUE(users.avatar) as avatar,
@@ -85,9 +104,9 @@ class Article extends Model
             ->orderBy('bloger_rating', 'desc');
     }
 
-    public static function getMostPopularArticles(Request $request)
+    public function scopeGetMostPopularArticles($query)
     {
-        return self::selectRaw('
+        return $query->selectRaw('
          articles.title,
          articles.body,
          ANY_VALUE(users.id) as author_id,
@@ -101,17 +120,22 @@ class Article extends Model
             ->orderBy('bloger_rating', 'desc');
     }
 
-
     protected static function boot()
     {
         parent::boot();
 
         // cause a delete of a poster to cascade
         // to children so they are also deleted
-        static::deleting(function ($article) {
+        static::deleting(function (Article $article) {
 
             $article->tags()->delete();
-            $article->comments()->delete();
+            foreach ($article->commentsFiles() as $file) {
+                $file->delete();
+            }
+
+            foreach ($article->articleFiles() as $file) {
+                $file->delete();
+            }
         });
 
     }

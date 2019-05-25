@@ -31,14 +31,13 @@ class Comment extends Model
 
     public function children()
     {
-      return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comment::class, 'parent_id');
     }
 
-    public static function save(Request $request)
+    public static function saveComment(Request $request)
     {
         $model = null;
         $commentModel = null;
-        $files = [];
 
         switch ($request->type) {
             case 'article':
@@ -51,24 +50,26 @@ class Comment extends Model
         if ($model) {
             $commentModel = $model->comments()->updateOrCreate(
                 [
-                  'id' => $request->comment_id
+                    'id' => $request->comment_id
                 ],
                 [
-                  'body' => $request->body,
-                  'parent_id' => $request->parent_id
+                    'body' => $request->body,
+                    'parent_id' => $request->parent_id,
+                    'user_id' => $request->user()->id
                 ]
-              );
+            );
 
             if (!empty($request->allFiles())) {
-               File::attachFiles($commentModel, array_values($request->allFiles()));
+                File::attachFiles($commentModel, array_values($request->allFiles()));
             }
         }
     }
 
-    public static function boot() {
+    public static function boot()
+    {
         parent::boot();
 
-        static::deleting(function($comment) {
+        static::deleting(function ($comment) {
             foreach ($comment->files as $file) {
                 $file->delete();
             }

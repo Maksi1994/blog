@@ -45,6 +45,26 @@ class User extends Authenticatable
         return $this->hasMany(Article::class);
     }
 
+    public function role() {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasManyThrough(Comment::class, Article::class, null, 'commentable_id')
+            ->where('commentable_type', Article::class);
+    }
+
+    public function articlesFavorites()
+    {
+         return $this->morphedByMany(Article::class, 'favoriable');
+    }
+
+    public function commentsFavorites()
+    {
+        return $this->morphedByMany(Comment::class, 'favoriable');
+    }
+
     public static function registUser(Request $request)
     {
         $avatar = null;
@@ -81,6 +101,11 @@ class User extends Authenticatable
             'name' => $request->first_name . ' ' . $request->last_name,
             'avatar' => $avatar
         ]);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role()->where('name', 'admin')->exists();
     }
 
     public static function boot()

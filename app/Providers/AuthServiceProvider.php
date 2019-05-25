@@ -14,7 +14,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        // 'App\Model' => 'App\Policies\ModelPolicy',
+        'App\Model' => 'App\Policies\ModelPolicy',
     ];
 
     /**
@@ -26,5 +26,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
         Passport::routes();
+
+        Gate::define('edit-article', 'App\Policies\ArticlePolicy@edit');
+        Gate::define('delete-article', 'App\Policies\ArticlePolicy@delete');
+
+        Gate::define('edit-comment', 'App\Policies\CommentPolicy@edit');
+        Gate::define('delete-comment', 'App\Policies\CommentPolicy@delete');
     }
 }

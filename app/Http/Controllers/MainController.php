@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\Main\ArticlesCollection;
 use App\Http\Resources\Main\BlogersCollection;
 use App\Models\Article;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MainController extends Controller
 {

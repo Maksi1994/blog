@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\Favorite\FavoritesCollection;
 use App\Http\Resources\User\UserResource;
+use App\Models\Favorite;
 use App\Models\ResetPassword;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -87,6 +89,9 @@ class UsersController extends Controller
 
         return $this->success($success);
     }
+
+
+
 
     public function login(Request $request)
     {

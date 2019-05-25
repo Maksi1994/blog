@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Main;
+namespace App\Http\Resources\Backend\Article;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class BlogersCollection extends ResourceCollection
+class ArticlesCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
